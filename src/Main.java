@@ -3,15 +3,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
 
 	private static final int BOARD_SIZE = 3;
 	private static final File FILE = new File("board");
-
-	private static char[] board = new char[BOARD_SIZE * BOARD_SIZE];
 
 	// Use linked list for board? When a character is checked, remove it so we
 	// don't check it again.
@@ -24,22 +24,43 @@ public class Main {
 
 		Scanner scanner = new Scanner(FILE);
 
-		for (int i = 0; i < board.length; i++) {
-			board[i] = scanner.next().charAt(0);
-			linkedBoard.addLast(board[i]);
+		// key: character, value: number of occurences
+		Map<Character, Integer> chars = new HashMap<Character, Integer>();
+		for (int i = 0; i < BOARD_SIZE*BOARD_SIZE; i++) {
+			char currentChar = scanner.next().charAt(0);
+			if(chars.containsKey(currentChar)){
+				chars.put(currentChar, (chars.get(currentChar) + 1));
+			} else {
+				chars.put(currentChar, 1);
+			}
+			if(i == (BOARD_SIZE*BOARD_SIZE)/2)
+				essentialChar = currentChar;
 		}
-		essentialChar = board[board.length / 2];
 
 		// sort the linked board, first char will appear first in the
 		// dictionary.
-		Collections.sort(linkedBoard);
+		
 
+		// HAHAHAHHAHA givet listan {o, b, c, c, d, o, f} så matchas följande regex. PLUG THAT SHIT IN IF YOU'D LIKE
+		//(?=(?:[^o]*o){0,2}[^o]*$)(?=(?:[^c]*c){0,2}[^c]*$)(?=[^b]*b?[^b]*$)(?=[^d]*d?[^d*]*$)(?=[^f]*f?[^f]*$)^[obcdf]+$
+		
 		// solve
-		String solution = solver(linkedBoard, 0, new StringBuilder(),
-				new Scanner(DICTIONARY));
-
-		if (solution.isEmpty()) {
-			System.out.println("UNSOLVABLE OMG");
+		String result = new String();
+		while(scanner.hasNextLine()){
+			String currentLine = scanner.nextLine();
+			if (currentLine.indexOf(essentialChar) == -1){
+				// do nothing
+			} else {
+				for (int i = 0; i < currentLine.length(); i++){
+					if (chars.containsKey(currentLine.charAt(i))){
+						if (currentLine.length() > result.length()){
+							currentLine = result;
+						}
+					} else {
+						break; // not a match
+					}
+				}
+			}
 		}
 		// solve
 		// solver(board, new StringBuilder(), 0, new Scanner(DICTIONARY));
